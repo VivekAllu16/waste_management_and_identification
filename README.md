@@ -1,132 +1,158 @@
-# Transforming-Waste-Management-with-Transfer-Learning
+# Transforming Waste Management with Transfer Learning
+
 An Intelligent Waste Classification Web Application Using TensorFlow and Flask
 
-Overview
-This project demonstrates an AI-powered web application that classifies waste images into categories such as cardboard, glass, metal, paper, plastic, and trash. It leverages transfer learning with MobileNetV2 to accurately identify waste types and provides useful environmental information including recyclability and degradability.
+---
 
-The app is built using TensorFlow for deep learning and Flask as the web framework, enabling users to upload waste images and get instant predictions with confidence scores.
+## Overview
 
-Features
-Image Upload: Simple web form to upload images of waste.
+This project is an AI-powered web application that classifies waste images into categories such as cardboard, glass, metal, paper, plastic, trash, and more. It uses transfer learning with MobileNetV2 for accurate waste identification and provides environmental information like recyclability and degradability.
 
-Waste Classification: Classifies images into 6 waste categories using a fine-tuned MobileNetV2 model.
+The model is trained on the `garbage_classification` dataset, which contains 15,000+ labeled images across multiple waste categories.
 
-Environmental Labels: Displays if waste is recyclable or non-recyclable and degradable or non-degradable.
+---
 
-Confidence Scores: Shows prediction certainty as a percentage.
+## Features
 
-Image Preview: Displays the uploaded image for verification.
+- **Image Upload:** Upload waste images via a simple web form.
+- **Automated Classification:** Predicts the waste category using a fine-tuned MobileNetV2 model.
+- **Environmental Labels:** Shows recyclability and degradability for each prediction.
+- **Confidence Score:** Displays prediction confidence as a percentage.
+- **Image Preview:** See the uploaded image alongside results.
+- **User-Friendly Interface:** Clean, responsive design for easy use.
 
-User-Friendly Interface: Clean, centered layout for ease of use.
+---
 
-Technologies Used
-TensorFlow 2.x: Deep learning framework for model training and inference.
+## Technologies Used
 
-MobileNetV2: Pre-trained CNN model used for transfer learning.
+- **TensorFlow 2.x:** Deep learning framework for model training and inference.
+- **MobileNetV2:** Pre-trained CNN model for transfer learning.
+- **Flask:** Web framework for the frontend and backend.
+- **NumPy:** Numerical computations.
+- **scikit-learn:** Evaluation metrics (optional).
+- **Matplotlib:** Training visualization (optional).
 
-Flask: Lightweight web framework to build the frontend and backend.
+---
 
-NumPy: For numerical computations.
+## Project Structure
 
-scikit-learn: For evaluation metrics (optional).
+```
+README.md
+Project files/
+    app.py
+    twmcode.ipynb
+    waste_classifier_model.h5
+    garbage_classification/
+        battery/
+        biological/
+        brown-glass/
+        cardboard/
+        clothes/
+        green-glass/
+        metal/
+        paper/
+        plastic/
+        shoes/
+        trash/
+        ...
+    static/
+        bg.jpg
+        uploads/
+    templates/
+        index.html
+Video Demo/
+    Video-Demo.mp4
+    readme.md
+```
 
-Matplotlib: For training visualization (optional).
+---
 
-Installation
-Clone the repository:
+## Installation
 
-bash
-Copy
-Edit
-cd waste-management-app
-Create and activate a virtual environment:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/waste-management-app.git
+   cd waste-management-app
+   ```
 
-bash
-Copy
-Edit
-python -m venv venv
-source venv/bin/activate       # On Windows: venv\Scripts\activate
-Install dependencies:
+2. **Create and activate a virtual environment:**
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate   # On Windows
+   ```
 
-bash
-Copy
-Edit
-pip install -r requirements.txt
-Ensure you have the trained model file waste_classifier_model.h5 in the project root.
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Create uploads folder:
+4. **Ensure the trained model file `waste_classifier_model.h5` is in the `Project files/` directory.**
 
-bash
-Copy
-Edit
-mkdir -p static/uploads
-Usage
-Start the Flask application:
+5. **Create the uploads folder if it doesn't exist:**
+   ```bash
+   mkdir static\uploads
+   ```
 
-bash
-Copy
-Edit
-python app.py
-Open your browser and go to:
+---
 
-cpp
-Copy
-Edit
+## Usage
 
-Upload an image of waste via the form and submit.
+1. **Start the Flask application:**
+   ```bash
+   python Project files/app.py
+   ```
 
-View the predicted waste category, recyclability, degradability, and confidence score.
+2. **Open your browser and go to:**
+   ```
+   http://127.0.0.1:5000/
+   ```
 
-Code Structure
-bash
-Copy
-Edit
-/project-root
-├── app.py                      # Flask app & TensorFlow model loading
-├── waste_classifier_model.h5   # Trained TensorFlow model file
-├── requirements.txt            # Python dependencies
-├── /templates
-│    └── index.html             # HTML template for web interface
-└── /static
-     └── /uploads               # Folder to save uploaded images
-How It Works
-The Flask app handles HTTP requests, manages image uploads, and serves the web pages.
+3. **Upload a waste image and view the prediction, recyclability, degradability, and confidence score.**
 
-Uploaded images are saved in static/uploads.
+---
 
-The TensorFlow model processes the uploaded image, returning a predicted class and confidence.
+## How It Works
 
-The app maps the prediction to environmental labels for recyclability and degradability.
+- The Flask app (`app.py`) manages image uploads and serves the web interface.
+- Uploaded images are stored in `static/uploads`.
+- The TensorFlow model (`waste_classifier_model.h5`) predicts the waste category and confidence.
+- The app displays environmental labels and the uploaded image.
 
-Results and uploaded image are dynamically rendered on the web page.
+---
 
-Model Training (Optional)
-If you want to retrain or fine-tune the model:
+## Model Training
 
-Use transfer learning with MobileNetV2.
+- The model is trained using transfer learning with MobileNetV2 in `twmcode.ipynb`.
+- The training uses the `garbage_classification` dataset with over 15,000 images.
+- Data augmentation and fine-tuning are applied for improved accuracy.
+- The trained model is saved as `waste_classifier_model.h5`.
 
-Apply data augmentation for better generalization.
+---
 
-Train using the dataset structured by waste categories.
+## Environment Labels
 
-Save the model as waste_classifier_model.h5.
+| Waste Type   | Recyclability      | Degradability      |
+|--------------|--------------------|--------------------|
+| cardboard    | ♻️ Recyclable      | 🌱 Degradable      |
+| glass        | ♻️ Recyclable      | ❌ Non-Degradable  |
+| metal        | ♻️ Recyclable      | ❌ Non-Degradable  |
+| paper        | ♻️ Recyclable      | 🌱 Degradable      |
+| plastic      | ♻️ Recyclable      | ❌ Non-Degradable  |
+| trash        | ❌ Not Recyclable   | ❌ Non-Degradable  |
+| ...          | ...                | ...                |
 
-Environment Labels
-Waste Type	Recyclability	Degradability
-cardboard	♻️ Recyclable	🌱 Degradable
-glass	♻️ Recyclable	❌ Non-Degradable
-metal	♻️ Recyclable	❌ Non-Degradable
-paper	♻️ Recyclable	🌱 Degradable
-plastic	♻️ Recyclable	❌ Non-Degradable
-trash	❌ Not Recyclable	❌ Non-Degradable
+---
 
-Future Enhancements
-Add drag-and-drop image upload.
+## Future Enhancements
 
-Support batch uploads for multiple images.
+- Drag-and-drop image upload
+- Batch image classification
+- User submission tracking
+- Cloud deployment
+- Multi-language support
 
-Integrate a database to track user submissions and predictions.
+---
 
-Deploy as a cloud service with scalable infrastructure.
+## Demo
 
-Add localization for multiple languages.
+See [Video Demo/Video-Demo.mp4](Video%20Demo/Video-Demo.mp4) for a walkthrough

@@ -3,23 +3,22 @@
 <head>
     <title>TWM - Transforming Waste Management</title>
 </head>
-<body style="text-align:center; font-family: Arial;">
-    <h2>🗑️ Transforming Waste Management</h2>
-
+<body>
+    <h2>Transforming Waste Management</h2>
     <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" required><br><br>
+        <input type="file" name="image" required><br>
         <input type="submit" value="Upload and Predict">
     </form>
 
     {% if filename %}
-        <h3>Uploaded Image:</h3>
-        <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="250"><br><br>
+    <h3>Uploaded Image:</h3>
+    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="250"><br>
 
-        <h3>Prediction Results:</h3>
-        <p><strong>Waste Type:</strong> {{ predicted_class }}</p>
-        <p><strong>Category:</strong> {{ category }}</p>
-        <p><strong>Degradability:</strong> {{ degradable }}</p>
-        <p><strong>Confidence:</strong> {{ confidence }}%</p>
+    <h3>Prediction Results:</h3>
+    <p><strong>Waste Type:</strong> {{ predicted_class }}</p>
+    <p><strong>Category:</strong> {{ category }}</p>
+    <p><strong>Degradability:</strong> {{ degradable }}</p>
+    <p><strong>Confidence:</strong> {{ confidence }}%</p>
     {% endif %}
 </body>
 </html>
