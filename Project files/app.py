@@ -8,7 +8,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-model = tf.keras.models.load_model('waste_classifier_model.h5')
+model = tf.keras.models.load_model('waste_classifier_model.keras')
 img_size = (224, 224)
 class_names = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
 
