@@ -1,24 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>TWM - Transforming Waste Management</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♻️ Waste Classification AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Transforming Waste Management</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" required><br>
-        <input type="submit" value="Upload and Predict">
-    </form>
+    <div class="container">
+        <h1>♻️ Waste Classification AI</h1>
+        <p>Upload an image to identify the type of waste and its recyclability.</p>
 
-    {% if filename %}
-    <h3>Uploaded Image:</h3>
-    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="250"><br>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="upload-box">
+                <input type="file" name="image" accept="image/*" id="file-input" required>
+                <label for="file-input" class="upload-label">Choose an image</label>
+                <button type="submit" class="btn">Predict</button>
+            </div>
+        </form>
 
-    <h3>Prediction Results:</h3>
-    <p><strong>Waste Type:</strong> {{ predicted_class }}</p>
-    <p><strong>Category:</strong> {{ category }}</p>
-    <p><strong>Degradability:</strong> {{ degradable }}</p>
-    <p><strong>Confidence:</strong> {{ confidence }}%</p>
-    {% endif %}
+        {% if filename %}
+        <div class="result-box">
+            <h2>🖼️ Uploaded Image</h2>
+            <img src="{{ url_for('static', filename='uploads/' + filename) }}" class="uploaded-img" alt="Uploaded waste image">
+
+            <div class="prediction">
+                <h2>🔍 Prediction Result</h2>
+                <p><strong>Predicted Class:</strong> {{ predicted_class }}</p>
+                <p><strong>Category:</strong> {{ category }}</p>
+                <p><strong>Degradability:</strong> {{ degradable }}</p>
+                <p><strong>Confidence:</strong> {{ confidence }}%</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
