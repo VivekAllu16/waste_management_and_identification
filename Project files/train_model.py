@@ -1,148 +1,108 @@
 """
-train_model.py
----------------
-Trains a MobileNetV2-based waste classifier on the 'garbage_classification/' dataset.
+train_svm_model.py
+-----------------
+Trains a high-accuracy waste classifier using SVM (from course syllabus).
 
-Expected folder structure:
-garbage_classification/
-    train/
-        battery/
-        biological/
-        ...
-    val/            (optional)
-        battery/
-        biological/
-        ...
+Method:
+- Support Vector Machine (Non-linear, RBF kernel)
+- Features: Color histogram + HOG (texture)
+- Preprocessing: Scaling
+- Evaluation: Accuracy, Confusion Matrix, Classification Report
 """
 
 import os
 import json
-import tensorflow as tf
-from tensorflow.keras import layers, models
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+import numpy as np
+from skimage.io import imread
+from skimage.transform import resize
+from skimage.feature import hog
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.pipeline import make_pipeline
+import joblib
 
 # -----------------------------
 # Configuration
 # -----------------------------
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATA_DIR = os.path.join(BASE_DIR, 'garbage_classification')
-TRAIN_DIR = os.path.join(DATA_DIR, 'train')
-VAL_DIR = os.path.join(DATA_DIR, 'val')
-MODEL_PATH = os.path.join(BASE_DIR, 'waste_classifier_model.keras')
+DATA_DIR = os.path.join(BASE_DIR, 'garbage_classification', 'train')
+MODEL_PATH = os.path.join(BASE_DIR, 'waste_svm_classifier.pkl')
 CLASS_NAMES_JSON = os.path.join(BASE_DIR, 'class_names.json')
 
-IMG_SIZE = (224, 224)
-BATCH_SIZE = 32
-EPOCHS = 20
-AUTOTUNE = tf.data.AUTOTUNE
+IMG_SIZE = (64, 64)
 
 # -----------------------------
-# Load Datasets
+# Load Dataset & Extract Features
 # -----------------------------
-print("📂 Loading datasets...")
+print("📂 Loading dataset and extracting features...")
 
-train_ds = tf.keras.utils.image_dataset_from_directory(
-    TRAIN_DIR,
-    labels="inferred",
-    label_mode="categorical",
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    shuffle=True
-)
+X, y, class_names = [], [], []
 
-class_names = train_ds.class_names
-print("✅ Detected classes:", class_names)
+for idx, folder in enumerate(sorted(os.listdir(DATA_DIR))):
+    folder_path = os.path.join(DATA_DIR, folder)
+    if not os.path.isdir(folder_path):
+        continue
+    class_names.append(folder)
+    for img_name in os.listdir(folder_path):
+        img_path = os.path.join(folder_path, img_name)
+        try:
+            img = imread(img_path)
+            img = resize(img, IMG_SIZE, anti_aliasing=True)
+            
+            # Feature 1: Color histogram
+            hist = np.histogram(img, bins=32, range=(0, 1))[0]
+            
+            # Feature 2: HOG (texture)
+            gray = np.mean(img, axis=2) if img.ndim == 3 else img
+            hog_features = hog(gray, pixels_per_cell=(8,8), cells_per_block=(2,2), feature_vector=True)
+            
+            features = np.concatenate([hist, hog_features])
+            X.append(features)
+            y.append(idx)
+        except:
+            continue
 
-# Save class names for Flask app
+X = np.array(X)
+y = np.array(y)
+
+print(f"✅ Loaded {len(X)} samples across {len(class_names)} classes.")
+
+# Save class names
 with open(CLASS_NAMES_JSON, "w") as f:
     json.dump(class_names, f, indent=2)
 
-if os.path.exists(VAL_DIR):
-    val_ds = tf.keras.utils.image_dataset_from_directory(
-        VAL_DIR,
-        labels="inferred",
-        label_mode="categorical",
-        image_size=IMG_SIZE,
-        batch_size=BATCH_SIZE,
-        shuffle=False
-    )
-else:
-    print("⚠️ No val folder found — creating 10% split from train data.")
-    total_batches = tf.data.experimental.cardinality(train_ds).numpy()
-    val_batches = max(1, int(0.1 * total_batches))
-    val_ds = train_ds.take(val_batches)
-    train_ds = train_ds.skip(val_batches)
-
 # -----------------------------
-# Preprocessing
+# Split Dataset
 # -----------------------------
-def preprocess(image, label):
-    return preprocess_input(image), label
-
-train_ds = train_ds.map(preprocess, num_parallel_calls=AUTOTUNE)
-val_ds = val_ds.map(preprocess, num_parallel_calls=AUTOTUNE)
-
-train_ds = train_ds.prefetch(AUTOTUNE)
-val_ds = val_ds.prefetch(AUTOTUNE)
-
-# -----------------------------
-# Model Definition
-# -----------------------------
-print("🧠 Building model...")
-
-base_model = MobileNetV2(
-    weights="imagenet",
-    include_top=False,
-    input_shape=IMG_SIZE + (3,)
-)
-base_model.trainable = False  # Freeze base for transfer learning
-
-model = models.Sequential([
-    base_model,
-    layers.GlobalAveragePooling2D(),
-    layers.Dropout(0.3),
-    layers.Dense(len(class_names), activation="softmax")
-])
-
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-    loss="categorical_crossentropy",
-    metrics=["accuracy"]
-)
-
-model.summary()
-
-# -----------------------------
-# Training
-# -----------------------------
-print("🚀 Training started...")
-history = model.fit(
-    train_ds,
-    validation_data=val_ds,
-    epochs=EPOCHS
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
 # -----------------------------
-# Fine-tuning (Optional Boost)
+# Train SVM (Non-linear, RBF)
 # -----------------------------
-print("🎯 Fine-tuning last layers...")
-base_model.trainable = True
-for layer in base_model.layers[:-40]:
-    layer.trainable = False
+print("🧠 Training SVM model (RBF Kernel)...")
 
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(1e-5),
-    loss="categorical_crossentropy",
-    metrics=["accuracy"]
+model = make_pipeline(
+    StandardScaler(),
+    SVC(kernel='rbf', C=10, gamma='scale', decision_function_shape='ovr')
 )
 
-fine_tune_epochs = 5
-model.fit(train_ds, validation_data=val_ds, epochs=fine_tune_epochs)
+model.fit(X_train, y_train)
+
+# -----------------------------
+# Evaluation
+# -----------------------------
+y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+print(f"✅ Accuracy: {acc*100:.2f}%")
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred, target_names=class_names))
 
 # -----------------------------
 # Save Model
 # -----------------------------
-model.save(MODEL_PATH)
-print(f"✅ Model saved at: {MODEL_PATH}")
-print(f"✅ Class names saved at: {CLASS_NAMES_JSON}")
+joblib.dump(model, MODEL_PATH)
+print(f"💾 Model saved at: {MODEL_PATH}")

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <center>
     <div class="container">
         <h1>♻️ Waste Classification AI</h1>
         <p>Upload an image to identify the type of waste and its recyclability.</p>
@@ -29,10 +30,17 @@
                 <p><strong>Predicted Class:</strong> {{ predicted_class }}</p>
                 <p><strong>Category:</strong> {{ category }}</p>
                 <p><strong>Degradability:</strong> {{ degradable }}</p>
-                <p><strong>Confidence:</strong> {{ confidence }}%</p>
+                <p><strong>Confidence:</strong>
+                    {% if confidence is not none %}
+                        {{ '%.2f'|format(confidence) }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
             </div>
         </div>
         {% endif %}
     </div>
+    </center>
 </body>
 </html>
